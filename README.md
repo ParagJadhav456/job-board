@@ -34,35 +34,35 @@ cd job-board
 
 
 
-Install Dependencies
+- Install Dependencies
 npm install
 
-Run Application
+- Run Application
 npm run dev
 
 
-Open in browser:
+- Open in browser:
 
 http://localhost:3000
 
-Backend APIs
-Health Check API
+- Backend APIs
+- Health Check API
 
-Endpoint: GET /api/health
-Purpose: Verify backend availability
-Sample Response
-    {
-    "status": "ok",
-    "message": "Backend is running fine"
-    }
+    - Endpoint: GET /api/health
+    - Purpose: Verify backend availability
+    - Sample Response
+            {
+            "status": "ok",
+            "message": "Backend is running fine"
+            }
 
-Version Control Workflow
-Git Initialization
+- Version Control Workflow
+- Git Initialization
 git init
 git add .
 git commit -m "Initial project setup"
 git branch -m main
 
-Remote Setup
+- Remote Setup
 git remote add origin https://github.com/ParagJadhav456/job-board.git
 git push -u origin main
