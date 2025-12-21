@@ -2,10 +2,54 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // "CANDIDATE" or "ADMIN"
+  createdAt DateTime @default(now())
+
+  jobs         Job[]
+  applications Application[]
+}
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  company     String
+  location    String
+  jobType     String   // "FULL_TIME", "INTERNSHIP", "CONTRACT"
+  createdAt   DateTime @default(now())
+
+  recruiterId Int
+  recruiter   User @relation(fields: [recruiterId], references: [id])
+
+  applications Application[]
+
+  @@index([createdAt])
+}
+
+model Application {
+  id        Int      @id @default(autoincrement())
+  resume    String
+  coverNote String?
+  appliedAt DateTime @default(now())
+
+  userId Int
+  jobId  Int
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  @@unique([userId, jobId])
 }
