@@ -102,11 +102,6 @@ http://localhost:3000
 - Token is sent in Authorization: Bearer <token> header for protected APIs
 
 
-
-
-
-
-
 - Version Control Workflow
 - Git Initialization
 git init
@@ -120,6 +115,25 @@ git remote add origin https://github.com/ParagJadhav456/job-board.git
 git push -u origin main
 
 ```
+
+---
+
+## Frontend Progress (Phase 2 – In Progress ✅)
+### Implemented Pages
+##### Job Listing Page
+
+- Route: /jobs
+- File: app/jobs/page.tsx
+- Fetches job data from: GET /api/jobs
+- Renders job title, company, and location
+- Confirms: 
+    - Frontend ↔ Backend integration
+    - App Router usage
+    - Correct API consumption
+
+- Important Architecture Rule
+    - /api/* → Backend only
+    - /jobs, /login, /signup → Frontend pages
 
 
 # Project Status

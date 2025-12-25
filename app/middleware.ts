@@ -1,55 +1,36 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import { error } from "console";
-import { stringify } from "querystring";
 
-export function middleware(request: NextResponse){
-    const authHeader = request.headers.get("authorization");
+const PUBLIC_ROUTES = ["/login", "/signup", "/"];
 
-    // 1 No Authorization header
-    if (!authHeader || !authHeader.startsWith("Bearer ")){
-        return NextResponse.json(
-            { error:"Unauthorized"},
-            { status: 401}
-        );
-    }
-    const token = authHeader.split(" ")[1];
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-    try {
-        // 2 Verify token
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET as string  
-        );
-        // 3 Attach user info to request headers
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set("x-user",JSON.stringify(decoded));
+  // Allow public routes
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return NextResponse.next();
+  }
 
-        return NextResponse.next({
-            request: {
-                headers: requestHeaders,
-            },
-        });
+  const token = request.cookies.get("token")?.value;
 
-    } catch(error){
-        return NextResponse.json(
-            {error: "Invalid or expired token"},
-            { status: 401}
-        );
-    }
+  // No token → redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
+  try {
+    jwt.verify(token, process.env.JWT_SECRET!);
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 }
 
-export const config={
-    matcher:[
-        "/api/jobs/:path*",
-        "/api/applications/:path*"
-    ],
+export const config = {
+  matcher: [
+    "/jobs/:path*",
+    "/applications/:path*",
+    "/debug",
+  ],
 };
-
-
-// 👉 Meaning:
-        // /api/jobs/* → protected
-        // /api/applications/* → protected
-        // /api/auth/login → public
-        // /api/users → public (for now)
