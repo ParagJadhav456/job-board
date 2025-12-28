@@ -2,15 +2,12 @@
 
 import { jwtDecode } from "jwt-decode";
 
+
 type DecodedToken = {
   userId: number;
   role: "ADMIN" | "CANDIDATE";
   exp: number;
 };
-
-/* ===============================
-   BASIC TOKEN HELPERS
-================================ */
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -20,15 +17,6 @@ export function getToken(): string | null {
 export function isLoggedIn(): boolean {
   return !!getToken();
 }
-
-export function logout() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("token");
-}
-
-/* ===============================
-   DECODED USER HELPERS
-================================ */
 
 export function getUserFromToken(): DecodedToken | null {
   const token = getToken();
@@ -41,7 +29,7 @@ export function getUserFromToken(): DecodedToken | null {
   }
 }
 
-export function isAdmin(): boolean {
-  const user = getUserFromToken();
-  return user?.role === "ADMIN";
+export function logout() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("token");
 }

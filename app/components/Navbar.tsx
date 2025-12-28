@@ -1,73 +1,67 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getToken, logout } from "@/app/lib/auth";
-import { jwtDecode } from "jwt-decode";
+import { getUserFromToken, logout } from "@/app/lib/auth";
 
-type DecodedToken = {
+type User = {
   userId: number;
   role: "ADMIN" | "CANDIDATE";
-  exp: number;
 };
 
 export default function Navbar() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [role, setRole] = useState<string | null>(null);
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [mounted, setMounted] = useState(false);
 
+  // ✅ Run only on client AFTER hydration
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setLoggedIn(false);
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      setLoggedIn(true);
-      setRole(decoded.role);
-    } catch {
-      setLoggedIn(false);
-    }
+    setMounted(true);
+    const decodedUser = getUserFromToken();
+    setUser(decodedUser);
   }, []);
 
   const handleLogout = () => {
     logout();
-    window.location.href = "/login";
+    setUser(null);
+    router.push("/login");
   };
+
+  // 🔒 Prevent hydration mismatch
+  if (!mounted) return null;
 
   return (
     <nav
       style={{
-        padding: "12px 20px",
-        borderBottom: "1px solid #333",
+        padding: "15px 30px",
         display: "flex",
         justifyContent: "space-between",
+        borderBottom: "1px solid #333",
       }}
     >
-      <div>
-        <Link href="/">JobBoard</Link>
-      </div>
+      <strong>JobBoard</strong>
 
-      <div style={{ display: "flex", gap: "15px" }}>
-        {!loggedIn && (
-          <>
-            <Link href="/login">Login</Link>
-            <Link href="/signup">Signup</Link>
-          </>
+      <div style={{ display: "flex", gap: "20px" }}>
+        <Link href="/jobs">Jobs</Link>
+
+        {user?.role === "CANDIDATE" && (
+          <Link href="/my-applications">My Applications</Link>
         )}
 
-        {loggedIn && (
+        {user?.role === "ADMIN" && (
+          <Link href="/admin/jobs/new">Create Job</Link>
+        )}
+
+        {user ? (
           <>
-            <Link href="/jobs">Jobs</Link>
-            <Link href="/applications">My Applications</Link>
-
             <span style={{ opacity: 0.7 }}>
-              Role: <strong>{role}</strong>
+              Role: {user.role}
             </span>
-
             <button onClick={handleLogout}>Logout</button>
           </>
+        ) : (
+          <Link href="/login">Login</Link>
         )}
       </div>
     </nav>
