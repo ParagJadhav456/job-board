@@ -3,42 +3,33 @@ import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
 
 export async function GET(
-  req: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = req.headers.get("authorization");
-
-    // No token → user not logged in → NOT applied
-    if (!auth) {
-      return NextResponse.json({ applied: false });
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ applied: false }, { status: 401 });
     }
 
-    const token = auth.split(" ")[1];
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as { userId: number };
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      userId: number;
+    };
 
     const jobId = Number(params.id);
 
-    if (isNaN(jobId)) {
-      return NextResponse.json({ applied: false });
-    }
-
-    const application = await prisma.application.findFirst({
+    const existing = await prisma.application.findFirst({
       where: {
-        jobId: jobId,
+        jobId,
         userId: decoded.userId,
       },
     });
 
     return NextResponse.json({
-      applied: Boolean(application),
+      applied: !!existing,
     });
-  } catch (err) {
-    // Any error → assume NOT applied (safe UX)
-    return NextResponse.json({ applied: false });
+  } catch (error) {
+    return NextResponse.json({ applied: false }, { status: 500 });
   }
 }

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // ✅ params is now a Promise
+  { params }: { params: { id: string } } // ✅ params is now a Promise
 ) {
   try {
     // ✅ Await params before using
